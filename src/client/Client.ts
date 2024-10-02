@@ -11,7 +11,7 @@ export type Handler<F extends Requests> = (functionName: keyof F, handler: F[typ
  * Type H represents the Requests the client has to handle.
  */
 export type Client<F extends Requests, H extends Requests> = F & {
-  setHandler: <K extends keyof H>(functoinName: K, handler: H[K]) => HandlerRemover;
+  setHandler: <K extends keyof H>(functionName: K, handler: H[K]) => HandlerRemover;
 }
 
 export interface ClientConfig<F extends Requests> {
@@ -23,27 +23,12 @@ export interface ClientConfig<F extends Requests> {
   parent: boolean;
 }
 
-interface ResolveReject {
-  resolve: (value: any) => void;
-  reject: (reason?: any) => void;
-}
-
 export const createClient = <F extends Requests, H extends Requests>({ 
   caller, 
   pubsub, 
   functionNames,
 }: ClientConfig<F>): Client<F, H> => {
   const generateId = createIdGenerator(caller);
-
-  pubsub.subscribe('connected', (message) => {
-    if (message.type === MessageType.REQUEST) {
-      pubsub.publish('connected', {
-        id: message.id,
-        type: MessageType.RESPONSE,
-        data: {},
-      });
-    }
-  });
   
   const createFunction = <T extends keyof F>(functionName: T): F[T] => {
     return ((...args: any[]) => {
@@ -68,7 +53,7 @@ export const createClient = <F extends Requests, H extends Requests>({
         console.log(`${caller} calls ${functionName.toString()}`, args);
 
         pubsub.subscribe('connected', (message, unsubscribe) => {
-          if (message.id !== id && message.type !== MessageType.RESPONSE) {
+          if (message.id !== id || message.type !== MessageType.RESPONSE || message.data.functionName !== functionName) {
             return;
           }
 
@@ -85,9 +70,11 @@ export const createClient = <F extends Requests, H extends Requests>({
           pubsub.publish('connected', {
             id,
             type: MessageType.REQUEST,
-            data: {},
+            data: {
+              functionName,
+            },
           });
-        }, 100);
+        }, 5);
       });
     }) as any;
   };
@@ -120,6 +107,18 @@ export const createClient = <F extends Requests, H extends Requests>({
           type: MessageType.RESPONSE,
           data: {
             reject: e,
+          },
+        });
+      }
+    });
+
+    pubsub.subscribe('connected', (message) => {
+      if (message.type === MessageType.REQUEST && message.data.functionName === functionName) {
+        pubsub.publish('connected', {
+          id: message.id,
+          type: MessageType.RESPONSE,
+          data: {
+            functionName,
           },
         });
       }

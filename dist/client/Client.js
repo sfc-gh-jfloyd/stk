@@ -14,15 +14,6 @@ const PubSub_1 = require("../pubsub/PubSub");
 const IdGenerator_1 = require("./IdGenerator");
 const createClient = ({ caller, pubsub, functionNames, }) => {
     const generateId = (0, IdGenerator_1.createIdGenerator)(caller);
-    pubsub.subscribe('connected', (message) => {
-        if (message.type === PubSub_1.MessageType.REQUEST) {
-            pubsub.publish('connected', {
-                id: message.id,
-                type: PubSub_1.MessageType.RESPONSE,
-                data: {},
-            });
-        }
-    });
     const createFunction = (functionName) => {
         return ((...args) => {
             const id = generateId();
@@ -45,7 +36,7 @@ const createClient = ({ caller, pubsub, functionNames, }) => {
                 });
                 console.log(`${caller} calls ${functionName.toString()}`, args);
                 pubsub.subscribe('connected', (message, unsubscribe) => {
-                    if (message.id !== id && message.type !== PubSub_1.MessageType.RESPONSE) {
+                    if (message.id !== id || message.type !== PubSub_1.MessageType.RESPONSE || message.data.functionName !== functionName) {
                         return;
                     }
                     pubsub.publish(functionName.toString(), {
@@ -60,9 +51,11 @@ const createClient = ({ caller, pubsub, functionNames, }) => {
                     pubsub.publish('connected', {
                         id,
                         type: PubSub_1.MessageType.REQUEST,
-                        data: {},
+                        data: {
+                            functionName,
+                        },
                     });
-                }, 100);
+                }, 5);
             });
         });
     };
@@ -97,6 +90,17 @@ const createClient = ({ caller, pubsub, functionNames, }) => {
                 });
             }
         }));
+        pubsub.subscribe('connected', (message) => {
+            if (message.type === PubSub_1.MessageType.REQUEST && message.data.functionName === functionName) {
+                pubsub.publish('connected', {
+                    id: message.id,
+                    type: PubSub_1.MessageType.RESPONSE,
+                    data: {
+                        functionName,
+                    },
+                });
+            }
+        });
         return () => {
             delete handlers[functionName];
             unsubscribe();

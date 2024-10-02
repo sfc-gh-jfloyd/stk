@@ -9,7 +9,7 @@ var MessageType;
 const createPubSub = ({ channelId, pubsubId, postMessage, addMessageListener, removeMessageListener }) => {
     return {
         publish: (event, message) => {
-            console.log('publish', event, message);
+            // console.log('publish', event, message)
             const pubsubMessage = {
                 channelId,
                 pubsubId,
@@ -25,7 +25,7 @@ const createPubSub = ({ channelId, pubsubId, postMessage, addMessageListener, re
                 if (pubsubMessage.channelId !== channelId || pubsubMessage.event !== event || pubsubMessage.pubsubId === pubsubId) {
                     return;
                 }
-                console.log('subscribe', pubsubMessage, pubsubId);
+                // console.log('subscribe', pubsubMessage, pubsubId);
                 listener(pubsubMessage.message, unsubscribe);
             };
             addMessageListener(wrappedListener);

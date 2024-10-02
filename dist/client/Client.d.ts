@@ -7,7 +7,7 @@ export type Handler<F extends Requests> = (functionName: keyof F, handler: F[typ
  * Type H represents the Requests the client has to handle.
  */
 export type Client<F extends Requests, H extends Requests> = F & {
-    setHandler: <K extends keyof H>(functoinName: K, handler: H[K]) => HandlerRemover;
+    setHandler: <K extends keyof H>(functionName: K, handler: H[K]) => HandlerRemover;
 };
 export interface ClientConfig<F extends Requests> {
     caller: string;

@@ -36,7 +36,7 @@ export interface PubSubConfig {
 export const createPubSub = ({ channelId, pubsubId, postMessage, addMessageListener, removeMessageListener }: PubSubConfig): PubSub => {
   return {
     publish: (event, message) => {
-      console.log('publish', event, message)
+      // console.log('publish', event, message)
       const pubsubMessage: PubSubMessage = {
         channelId,
         pubsubId,
@@ -53,8 +53,8 @@ export const createPubSub = ({ channelId, pubsubId, postMessage, addMessageListe
         if (pubsubMessage.channelId !== channelId || pubsubMessage.event !== event || pubsubMessage.pubsubId === pubsubId) {
           return;
         }
-        
-        console.log('subscribe', pubsubMessage, pubsubId);
+
+        // console.log('subscribe', pubsubMessage, pubsubId);
 
         listener(pubsubMessage.message, unsubscribe);
       };
