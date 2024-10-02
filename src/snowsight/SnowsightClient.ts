@@ -18,5 +18,6 @@ export const createSnowsightClient = (pubsub: PubSub): SnowsightClient => {
       requestReference: true,
       setPath: true,
     },
+    parent: false,
   })
 };

@@ -10,15 +10,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createClient = void 0;
-const MessageIdGenerator_1 = require("./MessageIdGenerator");
+const PubSub_1 = require("../pubsub/PubSub");
+const IdGenerator_1 = require("./IdGenerator");
 const createClient = ({ caller, pubsub, functionNames, }) => {
-    const generateId = (0, MessageIdGenerator_1.createMessageIdGenerator)(caller);
+    const generateId = (0, IdGenerator_1.createIdGenerator)(caller);
+    pubsub.subscribe('connected', (message) => {
+        if (message.type === PubSub_1.MessageType.REQUEST) {
+            pubsub.publish('connected', {
+                id: message.id,
+                type: PubSub_1.MessageType.RESPONSE,
+                data: {},
+            });
+        }
+    });
     const createFunction = (functionName) => {
         return ((...args) => {
             const id = generateId();
             return new Promise((resolve, reject) => {
-                const unsubscribe = pubsub.subscribe(functionName.toString(), message => {
-                    if (message.id !== id) {
+                pubsub.subscribe(functionName.toString(), (message, unsubscribe) => {
+                    if (message.id !== id || message.type !== PubSub_1.MessageType.RESPONSE) {
                         return;
                     }
                     if (message.data.resolve) {
@@ -30,12 +40,29 @@ const createClient = ({ caller, pubsub, functionNames, }) => {
                     else {
                         reject(`invalid message for ${functionName.toString()}`);
                     }
+                    console.log(`${caller} receives response for ${functionName.toString()}`, message.data);
                     unsubscribe();
                 });
-                pubsub.publish(functionName.toString(), {
-                    id,
-                    data: args,
+                console.log(`${caller} calls ${functionName.toString()}`, args);
+                pubsub.subscribe('connected', (message, unsubscribe) => {
+                    if (message.id !== id && message.type !== PubSub_1.MessageType.RESPONSE) {
+                        return;
+                    }
+                    pubsub.publish(functionName.toString(), {
+                        id,
+                        type: PubSub_1.MessageType.REQUEST,
+                        data: args,
+                    });
+                    unsubscribe();
+                    clearInterval(interval);
                 });
+                const interval = setInterval(() => {
+                    pubsub.publish('connected', {
+                        id,
+                        type: PubSub_1.MessageType.REQUEST,
+                        data: {},
+                    });
+                }, 100);
             });
         });
     };
@@ -46,10 +73,15 @@ const createClient = ({ caller, pubsub, functionNames, }) => {
         }
         handlers[functionName] = handler;
         const unsubscribe = pubsub.subscribe(functionName.toString(), (message) => __awaiter(void 0, void 0, void 0, function* () {
+            if (message.type !== PubSub_1.MessageType.REQUEST) {
+                return;
+            }
             try {
+                console.log(`${caller} responds for ${functionName.toString()}`, message.data);
                 const result = yield handler(...message.data);
                 pubsub.publish(functionName.toString(), {
                     id: message.id,
+                    type: PubSub_1.MessageType.RESPONSE,
                     data: {
                         resolve: result,
                     },
@@ -58,6 +90,7 @@ const createClient = ({ caller, pubsub, functionNames, }) => {
             catch (e) {
                 pubsub.publish(functionName.toString(), {
                     id: message.id,
+                    type: PubSub_1.MessageType.RESPONSE,
                     data: {
                         reject: e,
                     },

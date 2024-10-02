@@ -1,5 +1,5 @@
-import { PubSub } from "../pubsub/PubSub";
-import { createMessageIdGenerator } from "./MessageIdGenerator";
+import { MessageType, PubSub } from "../pubsub/PubSub";
+import { createIdGenerator } from "./IdGenerator";
 import { Requests } from "./Requests";
 
 export type HandlerRemover = () => void;
@@ -20,6 +20,12 @@ export interface ClientConfig<F extends Requests> {
   functionNames: {
     [k in keyof F]: true;
   };
+  parent: boolean;
+}
+
+interface ResolveReject {
+  resolve: (value: any) => void;
+  reject: (reason?: any) => void;
 }
 
 export const createClient = <F extends Requests, H extends Requests>({ 
@@ -27,14 +33,24 @@ export const createClient = <F extends Requests, H extends Requests>({
   pubsub, 
   functionNames,
 }: ClientConfig<F>): Client<F, H> => {
-  const generateId = createMessageIdGenerator(caller);
+  const generateId = createIdGenerator(caller);
+
+  pubsub.subscribe('connected', (message) => {
+    if (message.type === MessageType.REQUEST) {
+      pubsub.publish('connected', {
+        id: message.id,
+        type: MessageType.RESPONSE,
+        data: {},
+      });
+    }
+  });
   
   const createFunction = <T extends keyof F>(functionName: T): F[T] => {
     return ((...args: any[]) => {
       const id = generateId();
       return new Promise<any>((resolve, reject) => {
-        const unsubscribe = pubsub.subscribe(functionName.toString(), message => {
-          if (message.id !== id) {
+        pubsub.subscribe(functionName.toString(), (message, unsubscribe) => {
+          if (message.id !== id || message.type !== MessageType.RESPONSE) {
             return;
           }
 
@@ -45,13 +61,33 @@ export const createClient = <F extends Requests, H extends Requests>({
           } else {
             reject(`invalid message for ${functionName.toString()}`);
           }
-
+          console.log(`${caller} receives response for ${functionName.toString()}`, message.data);
           unsubscribe();
         });
-        pubsub.publish(functionName.toString(), {
-          id,
-          data: args,
-        })
+
+        console.log(`${caller} calls ${functionName.toString()}`, args);
+
+        pubsub.subscribe('connected', (message, unsubscribe) => {
+          if (message.id !== id && message.type !== MessageType.RESPONSE) {
+            return;
+          }
+
+          pubsub.publish(functionName.toString(), {
+            id,
+            type: MessageType.REQUEST,
+            data: args,
+          });
+          unsubscribe();
+          clearInterval(interval);
+        });
+
+        const interval = setInterval(() => {
+          pubsub.publish('connected', {
+            id,
+            type: MessageType.REQUEST,
+            data: {},
+          });
+        }, 100);
       });
     }) as any;
   };
@@ -65,11 +101,15 @@ export const createClient = <F extends Requests, H extends Requests>({
 
     handlers[functionName] = handler;
     const unsubscribe = pubsub.subscribe(functionName.toString(), async (message) => {
+      if (message.type !== MessageType.REQUEST) {
+        return;
+      }
       try {
-        console.log(`${caller} calls ${functionName.toString()}`, message.data);
+        console.log(`${caller} responds for ${functionName.toString()}`, message.data);
         const result = await (handler as any)(...message.data);
         pubsub.publish(functionName.toString(), {
           id: message.id,
+          type: MessageType.RESPONSE,
           data: {
             resolve: result,
           },
@@ -77,6 +117,7 @@ export const createClient = <F extends Requests, H extends Requests>({
       } catch (e) {
         pubsub.publish(functionName.toString(), {
           id: message.id,
+          type: MessageType.RESPONSE,
           data: {
             reject: e,
           },

@@ -16,5 +16,6 @@ export const createSnowletClient = (pubsub: PubSub): SnowletClient => {
     functionNames: {
       setPath: true,
     },
+    parent: true,
   })
 };

@@ -8,6 +8,7 @@ const PubSub_1 = require("./PubSub");
 const createSnowsightPubSub = ({ channelId }) => {
     return (0, PubSub_1.createPubSub)({
         channelId,
+        pubsubId: 'snowsightPubSub',
         postMessage: message => window.parent.postMessage(message, '*'),
         addMessageListener: listener => window.addEventListener('message', listener),
         removeMessageListener: listener => window.removeEventListener('message', listener),

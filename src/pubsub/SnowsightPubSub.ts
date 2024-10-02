@@ -10,6 +10,7 @@ export interface SnowsightPubSubConfig {
 export const createSnowsightPubSub = ({ channelId }: SnowsightPubSubConfig): PubSub => {
   return createPubSub({
     channelId,
+    pubsubId: 'snowsightPubSub',
     postMessage: message => window.parent.postMessage(message, '*'),
     addMessageListener: listener => window.addEventListener('message', listener),
     removeMessageListener: listener => window.removeEventListener('message', listener),

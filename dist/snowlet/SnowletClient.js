@@ -9,6 +9,7 @@ const createSnowletClient = (pubsub) => {
         functionNames: {
             setPath: true,
         },
+        parent: true,
     });
 };
 exports.createSnowletClient = createSnowletClient;

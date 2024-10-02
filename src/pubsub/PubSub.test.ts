@@ -1,4 +1,4 @@
-import { createPubSub } from "./PubSub";
+import { createPubSub, MessageType } from "./PubSub";
 
 describe('createPubSub', () => {
   it('publishes and subscribes to events', async () => {
@@ -7,25 +7,29 @@ describe('createPubSub', () => {
     const removeMessageListener = jest.fn();
     const pubsub = createPubSub({
       channelId: 'channel123',
+      pubsubId: 'test',
       postMessage,
       addMessageListener,
       removeMessageListener,
     });
 
-    pubsub.publish('event1', { id: '1', data: { text: 'hello world' } });
+    pubsub.publish('event1', { id: '1', data: { text: 'hello world' }, type: MessageType.REQUEST });
     expect(postMessage).toHaveBeenCalledWith({
       channelId: 'channel123',
       event: 'event1',
+      pubsubId: 'test',
       message: {
         id: '1',
-        text: 'hello world',
+        data: {
+          text: 'hello world',
+        },
       },
     });
 
     const listener = jest.fn();
     const unsubscribe = pubsub.subscribe('event1', listener);
-    expect(addEventListener).toHaveBeenCalledWith(expect.any(Function));
+    expect(addMessageListener).toHaveBeenCalledWith(expect.any(Function));
     unsubscribe();
-    expect(removeEventListener).toHaveBeenCalledWith(expect.any(Function));
+    expect(removeMessageListener).toHaveBeenCalledWith(expect.any(Function));
   });
 });
