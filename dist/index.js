@@ -10,14 +10,34 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
 }));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSnowletClient = void 0;
-const createApis_1 = require("./createApis");
-const { createClient } = (0, createApis_1.createApis)();
-const client = createClient();
-const getSnowletClient = () => client;
-exports.getSnowletClient = getSnowletClient;
-__exportStar(require("./SnowletClient"), exports);
+exports.snowsightClient = exports.createSnowletClient = void 0;
+const SnowletPubSub_1 = require("./pubsub/SnowletPubSub");
+const SnowsightPubSub_1 = require("./pubsub/SnowsightPubSub");
+const SnowsightClient = __importStar(require("./snowlet/SnowletClient"));
+const SnowsightClient_1 = require("./snowsight/SnowsightClient");
+const createSnowletClient = ({ snowletId, iframe }) => (SnowsightClient.createSnowletClient((0, SnowletPubSub_1.createSnowletPubSub)({
+    channelId: snowletId,
+    iframe,
+})));
+exports.createSnowletClient = createSnowletClient;
+exports.snowsightClient = (0, SnowsightClient_1.createSnowsightClient)((0, SnowsightPubSub_1.createSnowsightPubSub)({
+    channelId: window.snowletId,
+}));
+__exportStar(require("./snowsight/SnowsightClient"), exports);
+__exportStar(require("./snowsight/SnowsightRequests"), exports);
