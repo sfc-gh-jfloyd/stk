@@ -15,6 +15,6 @@ export interface ClientConfig<F extends Requests> {
     functionNames: {
         [k in keyof F]: true;
     };
-    parent: boolean;
+    onLog?: (...args: any[]) => void;
 }
-export declare const createClient: <F extends Requests, H extends Requests>({ caller, pubsub, functionNames, }: ClientConfig<F>) => Client<F, H>;
+export declare const createClient: <F extends Requests, H extends Requests>({ caller, pubsub, functionNames, onLog, }: ClientConfig<F>) => Client<F, H>;

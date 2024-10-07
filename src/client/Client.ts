@@ -20,13 +20,14 @@ export interface ClientConfig<F extends Requests> {
   functionNames: {
     [k in keyof F]: true;
   };
-  parent: boolean;
+  onLog?: (...args: any[]) => void;
 }
 
 export const createClient = <F extends Requests, H extends Requests>({ 
   caller, 
   pubsub, 
   functionNames,
+  onLog = () => {},
 }: ClientConfig<F>): Client<F, H> => {
   const generateId = createIdGenerator(caller);
   
@@ -39,18 +40,18 @@ export const createClient = <F extends Requests, H extends Requests>({
             return;
           }
 
-          if (message.data.resolve) {
+          if ('resolve' in message.data) {
             resolve(message.data.resolve);
-          } else if (message.data.reject) {
+          } else if ('reject' in message.data) {
             reject(message.data.reject);
           } else {
             reject(`invalid message for ${functionName.toString()}`);
           }
-          console.log(`${caller} receives response for ${functionName.toString()}`, message.data);
+          onLog(`${caller} receives response for ${functionName.toString()}`, message.data);
           unsubscribe();
         });
 
-        console.log(`${caller} calls ${functionName.toString()}`, args);
+        onLog(`${caller} calls ${functionName.toString()}`, args);
 
         pubsub.subscribe('connected', (message, unsubscribe) => {
           if (message.id !== id || message.type !== MessageType.RESPONSE || message.data.functionName !== functionName) {
@@ -92,7 +93,7 @@ export const createClient = <F extends Requests, H extends Requests>({
         return;
       }
       try {
-        console.log(`${caller} responds for ${functionName.toString()}`, message.data);
+        onLog(`${caller} responds for ${functionName.toString()}`, message.data);
         const result = await (handler as any)(...message.data);
         pubsub.publish(functionName.toString(), {
           id: message.id,

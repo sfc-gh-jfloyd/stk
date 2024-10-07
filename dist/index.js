@@ -36,8 +36,15 @@ const createSnowletClient = ({ snowletId, iframe }) => (SnowsightClient.createSn
     iframe,
 })));
 exports.createSnowletClient = createSnowletClient;
+const snowletId = window.snowletId || new URLSearchParams(window.location.search).get("snowletId");
+if (snowletId) {
+    const meta = document.createElement('meta');
+    meta.httpEquiv = "Content-Security-Policy";
+    meta.content = `default-src ${window.location.origin}; style-src ${window.location.origin} 'unsafe-inline'; script-src ${window.location.origin} 'unsafe-inline'; connect-src ${window.location.origin} ws://${window.location.host}/ws; frame-src 'none';`;
+    document.head.append(meta);
+}
 exports.snowsightClient = (0, SnowsightClient_1.createSnowsightClient)((0, SnowsightPubSub_1.createSnowsightPubSub)({
-    channelId: window.snowletId,
+    channelId: snowletId,
 }));
 __exportStar(require("./snowsight/SnowsightClient"), exports);
 __exportStar(require("./snowsight/SnowsightRequests"), exports);

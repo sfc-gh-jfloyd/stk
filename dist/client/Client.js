@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createClient = void 0;
 const PubSub_1 = require("../pubsub/PubSub");
 const IdGenerator_1 = require("./IdGenerator");
-const createClient = ({ caller, pubsub, functionNames, }) => {
+const createClient = ({ caller, pubsub, functionNames, onLog = () => { }, }) => {
     const generateId = (0, IdGenerator_1.createIdGenerator)(caller);
     const createFunction = (functionName) => {
         return ((...args) => {
@@ -22,19 +22,19 @@ const createClient = ({ caller, pubsub, functionNames, }) => {
                     if (message.id !== id || message.type !== PubSub_1.MessageType.RESPONSE) {
                         return;
                     }
-                    if (message.data.resolve) {
+                    if ('resolve' in message.data) {
                         resolve(message.data.resolve);
                     }
-                    else if (message.data.reject) {
+                    else if ('reject' in message.data) {
                         reject(message.data.reject);
                     }
                     else {
                         reject(`invalid message for ${functionName.toString()}`);
                     }
-                    console.log(`${caller} receives response for ${functionName.toString()}`, message.data);
+                    onLog(`${caller} receives response for ${functionName.toString()}`, message.data);
                     unsubscribe();
                 });
-                console.log(`${caller} calls ${functionName.toString()}`, args);
+                onLog(`${caller} calls ${functionName.toString()}`, args);
                 pubsub.subscribe('connected', (message, unsubscribe) => {
                     if (message.id !== id || message.type !== PubSub_1.MessageType.RESPONSE || message.data.functionName !== functionName) {
                         return;
@@ -70,7 +70,7 @@ const createClient = ({ caller, pubsub, functionNames, }) => {
                 return;
             }
             try {
-                console.log(`${caller} responds for ${functionName.toString()}`, message.data);
+                onLog(`${caller} responds for ${functionName.toString()}`, message.data);
                 const result = yield handler(...message.data);
                 pubsub.publish(functionName.toString(), {
                     id: message.id,

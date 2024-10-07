@@ -12,7 +12,6 @@ const createSnowsightClient = (pubsub) => {
             requestReference: true,
             setPath: true,
         },
-        parent: false,
     });
 };
 exports.createSnowsightClient = createSnowsightClient;
