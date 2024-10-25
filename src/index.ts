@@ -20,10 +20,11 @@ export const createSnowletClient = ({ snowletId, iframe }: SnowletClientConfig) 
 const snowletId = (window as any).snowletId || new URLSearchParams(window.location.search).get("snowletId");
 
 if (snowletId) {
+  console.log({snowletId});
   const meta = document.createElement('meta');
   meta.httpEquiv = "Content-Security-Policy";
-  meta.content = `default-src ${window.location.origin}; style-src ${window.location.origin} 'unsafe-inline'; script-src ${window.location.origin} 'unsafe-inline'; connect-src ${window.location.origin} ws://${window.location.host}/ws; frame-src 'none';`
-  document.head.append(meta)
+  meta.content = `default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; form-action 'none';`
+  document.head.append(meta);
 }
 
 export const snowsightClient = createSnowsightClient(

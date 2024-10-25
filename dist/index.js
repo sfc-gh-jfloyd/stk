@@ -38,9 +38,10 @@ const createSnowletClient = ({ snowletId, iframe }) => (SnowsightClient.createSn
 exports.createSnowletClient = createSnowletClient;
 const snowletId = window.snowletId || new URLSearchParams(window.location.search).get("snowletId");
 if (snowletId) {
+    console.log({ snowletId });
     const meta = document.createElement('meta');
     meta.httpEquiv = "Content-Security-Policy";
-    meta.content = `default-src ${window.location.origin}; style-src ${window.location.origin} 'unsafe-inline'; script-src ${window.location.origin} 'unsafe-inline'; connect-src ${window.location.origin} ws://${window.location.host}/ws; frame-src 'none';`;
+    meta.content = `default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; form-action 'none'; frame-src http://app.snowflake.local:9000/`;
     document.head.append(meta);
 }
 exports.snowsightClient = (0, SnowsightClient_1.createSnowsightClient)((0, SnowsightPubSub_1.createSnowsightPubSub)({
