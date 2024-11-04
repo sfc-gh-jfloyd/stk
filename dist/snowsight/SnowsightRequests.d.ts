@@ -22,6 +22,8 @@ export interface SnowsightRequests {
     requestPrivileges: (privileges: APPLICATION_GRANTS[]) => Promise<void>;
     requestQuery: (args: QueryRequestArgs) => Promise<QueryResponse>;
     setPath: (path: string) => Promise<void>;
+    getAppName: () => Promise<string>;
+    getSdkUrl: () => Promise<string>;
 }
 /**
  * Map to include all snowlet request function names

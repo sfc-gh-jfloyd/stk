@@ -25,6 +25,8 @@ export interface SnowsightRequests {
   requestPrivileges: (privileges: APPLICATION_GRANTS[]) => Promise<void>;
   requestQuery: (args: QueryRequestArgs) => Promise<QueryResponse>;
   setPath: (path: string) => Promise<void>;
+  getAppName: () => Promise<string>;
+  getSdkUrl: () => Promise<string>;
 }
 
 /**
@@ -36,4 +38,6 @@ export const SNOWSIGHT_REQUEST_FUNCTION_NAME_MAP: { [key in keyof SnowsightReque
   requestReference: true,
   requestQuery: true,
   setPath: true,
+  getAppName: true,
+  getSdkUrl: true,
 };

@@ -13,16 +13,13 @@ export interface PubSub {
     subscribe: (event: string, listener: (message: Message, unsubscribe: DeregisterListener) => void) => DeregisterListener;
 }
 export interface PubSubMessage {
-    channelId: string;
     pubsubId: string;
     event: string;
     message: Message;
 }
 export interface PubSubConfig {
-    channelId: string;
     pubsubId: string;
-    postMessage: (message: any) => void;
-    addMessageListener: (listener: (message: any) => void) => void;
-    removeMessageListener: (listener: (message: any) => void) => void;
+    targetOrigin: string;
+    targetWindow: Window;
 }
-export declare const createPubSub: ({ channelId, pubsubId, postMessage, addMessageListener, removeMessageListener }: PubSubConfig) => PubSub;
+export declare const createPubSub: ({ pubsubId, targetOrigin, targetWindow }: PubSubConfig) => PubSub;

@@ -6,31 +6,28 @@ var MessageType;
     MessageType["REQUEST"] = "REQUEST";
     MessageType["RESPONSE"] = "RESPONSE";
 })(MessageType || (exports.MessageType = MessageType = {}));
-const createPubSub = ({ channelId, pubsubId, postMessage, addMessageListener, removeMessageListener }) => {
+const createPubSub = ({ pubsubId, targetOrigin, targetWindow }) => {
     return {
         publish: (event, message) => {
-            // console.log('publish', event, message)
             const pubsubMessage = {
-                channelId,
                 pubsubId,
                 event,
                 message,
             };
-            postMessage(pubsubMessage);
+            targetWindow.postMessage(pubsubMessage, targetOrigin);
         },
         subscribe: (event, listener) => {
             let unsubscribe;
-            const wrappedListener = ({ data: pubsubMessage }) => {
-                // Ignore messages from other channels, events, and messages from this pubsub
-                if (pubsubMessage.channelId !== channelId || pubsubMessage.event !== event || pubsubMessage.pubsubId === pubsubId) {
+            const wrappedListener = ({ data: pubsubMessage, origin }) => {
+                // Ignore messages from other origins, events, and messages from this pubsub
+                if (pubsubMessage.event !== event || pubsubMessage.pubsubId === pubsubId) {
                     return;
                 }
-                // console.log('subscribe', pubsubMessage, pubsubId);
                 listener(pubsubMessage.message, unsubscribe);
             };
-            addMessageListener(wrappedListener);
+            window.addEventListener('message', wrappedListener);
             unsubscribe = () => {
-                removeMessageListener(wrappedListener);
+                window.removeEventListener('message', wrappedListener);
             };
             return unsubscribe;
         },

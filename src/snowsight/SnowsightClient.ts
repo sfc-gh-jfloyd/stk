@@ -18,6 +18,9 @@ export const createSnowsightClient = (pubsub: PubSub): SnowsightClient => {
       requestReference: true,
       requestQuery: true,
       setPath: true,
+      getAppName: true,
+      getSdkUrl: true,
     },
+    onLog: (...args) => console.log(...args),
   })
 };

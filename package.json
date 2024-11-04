@@ -1,5 +1,5 @@
 {
-  "name": "@snowflake/snowlet-toolkit",
+  "name": "@snowflake/snowsight-toolkit",
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {

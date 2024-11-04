@@ -12,7 +12,10 @@ const createSnowsightClient = (pubsub) => {
             requestReference: true,
             requestQuery: true,
             setPath: true,
+            getAppName: true,
+            getSdkUrl: true,
         },
+        onLog: (...args) => console.log(...args),
     });
 };
 exports.createSnowsightClient = createSnowsightClient;

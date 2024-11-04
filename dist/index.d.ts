@@ -1,10 +1,12 @@
 import * as SnowsightClient from "./snowlet/SnowletClient";
-export interface SnowletClientConfig {
-    snowletId: string;
-    iframe: HTMLIFrameElement;
+import * as SnowletClient from "./snowsight/SnowsightClient";
+export interface ClientConfig {
+    targetOrigin: string;
+    targetWindow: Window;
 }
-export declare const createSnowletClient: ({ snowletId, iframe }: SnowletClientConfig) => SnowsightClient.SnowletClient;
-export declare const snowsightClient: import("./snowsight/SnowsightClient").SnowsightClient;
+export declare const createSnowletClient: ({ targetOrigin, targetWindow }: ClientConfig) => SnowsightClient.SnowletClient;
+export declare let snowsightClient: SnowletClient.SnowsightClient;
+export declare const getSnowsightClient: () => SnowletClient.SnowsightClient;
 export { SnowletClient } from './snowlet/SnowletClient';
 export { SnowletRequests } from './snowlet/SnowletRequests';
 export * from './snowsight/SnowsightClient';

@@ -10,4 +10,6 @@ exports.SNOWSIGHT_REQUEST_FUNCTION_NAME_MAP = {
     requestReference: true,
     requestQuery: true,
     setPath: true,
+    getAppName: true,
+    getSdkUrl: true,
 };

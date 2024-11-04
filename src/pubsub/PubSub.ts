@@ -19,48 +19,41 @@ export interface PubSub {
 }
 
 export interface PubSubMessage {
-  channelId: string;
   pubsubId: string;
   event: string;
   message: Message;
 }
 
 export interface PubSubConfig {
-  channelId: string;
   pubsubId: string;
-  postMessage: (message: any) => void;
-  addMessageListener: (listener: (message: any) => void) => void;
-  removeMessageListener: (listener: (message: any) => void) => void;
+  targetOrigin: string;
+  targetWindow: Window;
 }
 
-export const createPubSub = ({ channelId, pubsubId, postMessage, addMessageListener, removeMessageListener }: PubSubConfig): PubSub => {
+export const createPubSub = ({ pubsubId, targetOrigin, targetWindow }: PubSubConfig): PubSub => {
   return {
     publish: (event, message) => {
-      // console.log('publish', event, message)
       const pubsubMessage: PubSubMessage = {
-        channelId,
         pubsubId,
         event,
         message,
       };
 
-      postMessage(pubsubMessage);
+      targetWindow.postMessage(pubsubMessage, targetOrigin);
     },
     subscribe: (event, listener) => {
       let unsubscribe: () => void;
-      const wrappedListener  = ({ data: pubsubMessage }: MessageEvent<PubSubMessage>) => {
-        // Ignore messages from other channels, events, and messages from this pubsub
-        if (pubsubMessage.channelId !== channelId || pubsubMessage.event !== event || pubsubMessage.pubsubId === pubsubId) {
+      const wrappedListener  = ({ data: pubsubMessage, origin }: MessageEvent<PubSubMessage>) => {
+        // Ignore messages from other origins, events, and messages from this pubsub
+        if (pubsubMessage.event !== event || pubsubMessage.pubsubId === pubsubId) {
           return;
         }
 
-        // console.log('subscribe', pubsubMessage, pubsubId);
-
         listener(pubsubMessage.message, unsubscribe);
       };
-      addMessageListener(wrappedListener);
+      window.addEventListener('message', wrappedListener);
       unsubscribe = () => {
-        removeMessageListener(wrappedListener);
+        window.removeEventListener('message', wrappedListener);
       };
       return unsubscribe;
     },

@@ -9,6 +9,7 @@ const createSnowletClient = (pubsub) => {
         functionNames: {
             setPath: true,
         },
+        onLog: (...args) => console.log(...args),
     });
 };
 exports.createSnowletClient = createSnowletClient;

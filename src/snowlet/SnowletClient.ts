@@ -1,7 +1,6 @@
 import { Client, createClient } from "../client/Client";
 import { SnowletRequests } from "./SnowletRequests";
 import { SnowsightRequests } from "../snowsight/SnowsightRequests";
-import { createSnowletPubSub } from "../pubsub/SnowletPubSub";
 import { PubSub } from "../pubsub/PubSub";
 
 /**
@@ -16,5 +15,6 @@ export const createSnowletClient = (pubsub: PubSub): SnowletClient => {
     functionNames: {
       setPath: true,
     },
+    onLog: (...args) => console.log(...args),
   })
 };

@@ -25,27 +25,65 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.snowsightClient = exports.createSnowletClient = void 0;
-const SnowletPubSub_1 = require("./pubsub/SnowletPubSub");
-const SnowsightPubSub_1 = require("./pubsub/SnowsightPubSub");
+exports.getSnowsightClient = exports.snowsightClient = exports.createSnowletClient = void 0;
+const PubSub_1 = require("./pubsub/PubSub");
 const SnowsightClient = __importStar(require("./snowlet/SnowletClient"));
-const SnowsightClient_1 = require("./snowsight/SnowsightClient");
-const createSnowletClient = ({ snowletId, iframe }) => (SnowsightClient.createSnowletClient((0, SnowletPubSub_1.createSnowletPubSub)({
-    channelId: snowletId,
-    iframe,
+const SnowletClient = __importStar(require("./snowsight/SnowsightClient"));
+const createSnowletClient = ({ targetOrigin, targetWindow }) => (SnowsightClient.createSnowletClient((0, PubSub_1.createPubSub)({
+    pubsubId: 'snowsight',
+    targetOrigin,
+    targetWindow,
 })));
 exports.createSnowletClient = createSnowletClient;
-const snowletId = window.snowletId || new URLSearchParams(window.location.search).get("snowletId");
-if (snowletId) {
-    console.log({ snowletId });
-    const meta = document.createElement('meta');
-    meta.httpEquiv = "Content-Security-Policy";
-    meta.content = `default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; form-action 'none'; frame-src http://app.snowflake.local:9000/`;
-    document.head.append(meta);
-}
-exports.snowsightClient = (0, SnowsightClient_1.createSnowsightClient)((0, SnowsightPubSub_1.createSnowsightPubSub)({
-    channelId: snowletId,
-}));
+const createSnowletDevClient = () => {
+    const snowsightClient = SnowletClient.createSnowsightClient((0, PubSub_1.createPubSub)({
+        pubsubId: 'snowlet',
+        targetOrigin: "*",
+        targetWindow: window.opener,
+    }));
+    const createPopupHandler = (functionName) => {
+        return (...args) => __awaiter(void 0, void 0, void 0, function* () {
+            const sdkUrl = yield snowsightClient.getSdkUrl();
+            const snowsight = window.open(sdkUrl, '_blank', `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=800,height=600,left=${window.screenX + window.innerWidth / 2 - 400},top=${window.screenY + window.innerHeight / 2 - 300}`);
+            const windowSnowletClient = SnowletClient.createSnowsightClient((0, PubSub_1.createPubSub)({
+                pubsubId: 'snowlet',
+                targetOrigin: new URL(sdkUrl).origin,
+                targetWindow: snowsight,
+            }));
+            const fn = windowSnowletClient[functionName];
+            const result = yield fn(...args);
+            snowsight === null || snowsight === void 0 ? void 0 : snowsight.close();
+            return result;
+        });
+    };
+    return Object.assign(Object.assign({}, snowsightClient), { requestReference: createPopupHandler('requestReference'), requestPrivileges: createPopupHandler('requestPrivileges'), requestQuery: createPopupHandler('requestQuery'), setPath: () => Promise.resolve(), setHandler: (name, fn) => {
+            if (name === 'setPath') {
+                return () => undefined;
+            }
+            return snowsightClient.setHandler(name, fn);
+        } });
+};
+const createSnowletIframeClient = () => {
+    return SnowletClient.createSnowsightClient((0, PubSub_1.createPubSub)({
+        pubsubId: 'snowlet',
+        targetOrigin: "*",
+        targetWindow: window.parent,
+    }));
+};
+exports.snowsightClient = window.opener ? createSnowletDevClient() : createSnowletIframeClient();
+const getSnowsightClient = () => {
+    return exports.snowsightClient;
+};
+exports.getSnowsightClient = getSnowsightClient;
 __exportStar(require("./snowsight/SnowsightClient"), exports);
 __exportStar(require("./snowsight/SnowsightRequests"), exports);
