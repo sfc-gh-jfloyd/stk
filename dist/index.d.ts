@@ -1,13 +1,13 @@
-import * as SnowsightClient from "./snowlet/SnowletClient";
-import * as SnowletClient from "./snowsight/SnowsightClient";
+import * as NativeApp from "./client/NativeAppClient";
+import * as Snowflake from "./client/SnowflakeClient";
 export interface ClientConfig {
     targetOrigin: string;
     targetWindow: Window;
 }
-export declare const createSnowletClient: ({ targetOrigin, targetWindow }: ClientConfig) => SnowsightClient.SnowletClient;
-export declare let snowsightClient: SnowletClient.SnowsightClient;
-export declare const getSnowsightClient: () => SnowletClient.SnowsightClient;
-export { SnowletClient } from './snowlet/SnowletClient';
-export { SnowletRequests } from './snowlet/SnowletRequests';
-export * from './snowsight/SnowsightClient';
-export * from './snowsight/SnowsightRequests';
+export declare const createNativeAppClient: ({ targetOrigin, targetWindow }: ClientConfig) => NativeApp.NativeAppClient;
+export declare const snowflakeClient: Snowflake.SnowflakeClient;
+export declare const getSnowsightClient: () => Snowflake.SnowflakeClient;
+export { NativeAppClient as SnowletClient } from './client/NativeAppClient';
+export { NativeAppRequests } from './client/NativeAppRequests';
+export * from './client/SnowflakeClient';
+export * from './client/SnowflakeRequests';

@@ -35,28 +35,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSnowsightClient = exports.snowsightClient = exports.createSnowletClient = void 0;
+exports.getSnowsightClient = exports.snowflakeClient = exports.createNativeAppClient = void 0;
 const PubSub_1 = require("./pubsub/PubSub");
-const SnowsightClient = __importStar(require("./snowlet/SnowletClient"));
-const SnowletClient = __importStar(require("./snowsight/SnowsightClient"));
-const createSnowletClient = ({ targetOrigin, targetWindow }) => (SnowsightClient.createSnowletClient((0, PubSub_1.createPubSub)({
-    pubsubId: 'snowsight',
+const NativeApp = __importStar(require("./client/NativeAppClient"));
+const Snowflake = __importStar(require("./client/SnowflakeClient"));
+const createNativeAppClient = ({ targetOrigin, targetWindow }) => (NativeApp.createNativeAppClient((0, PubSub_1.createPubSub)({
+    pubsubId: 'native-app',
     targetOrigin,
     targetWindow,
 })));
-exports.createSnowletClient = createSnowletClient;
-const createSnowletDevClient = () => {
-    const snowsightClient = SnowletClient.createSnowsightClient((0, PubSub_1.createPubSub)({
-        pubsubId: 'snowlet',
+exports.createNativeAppClient = createNativeAppClient;
+const createSnowflakeClient = () => {
+    const snowflakeClient = Snowflake.createSnowflakeClient((0, PubSub_1.createPubSub)({
+        pubsubId: 'snowflake',
         targetOrigin: "*",
         targetWindow: window.opener,
     }));
     const createPopupHandler = (functionName) => {
         return (...args) => __awaiter(void 0, void 0, void 0, function* () {
-            const sdkUrl = yield snowsightClient.getSdkUrl();
+            const snowsightNativeAppURl = yield snowflakeClient.getSnowsightNativeAppUrl();
+            const sdkUrl = snowsightNativeAppURl + "/sdk";
             const snowsight = window.open(sdkUrl, '_blank', `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=800,height=600,left=${window.screenX + window.innerWidth / 2 - 400},top=${window.screenY + window.innerHeight / 2 - 300}`);
-            const windowSnowletClient = SnowletClient.createSnowsightClient((0, PubSub_1.createPubSub)({
-                pubsubId: 'snowlet',
+            const windowSnowletClient = Snowflake.createSnowflakeClient((0, PubSub_1.createPubSub)({
+                pubsubId: 'snowflake',
                 targetOrigin: new URL(sdkUrl).origin,
                 targetWindow: snowsight,
             }));
@@ -66,24 +67,24 @@ const createSnowletDevClient = () => {
             return result;
         });
     };
-    return Object.assign(Object.assign({}, snowsightClient), { requestReference: createPopupHandler('requestReference'), requestPrivileges: createPopupHandler('requestPrivileges'), requestQuery: createPopupHandler('requestQuery'), setPath: () => Promise.resolve(), setHandler: (name, fn) => {
+    return Object.assign(Object.assign({}, snowflakeClient), { requestReference: createPopupHandler('requestReference'), requestPrivileges: createPopupHandler('requestPrivileges'), requestQuery: createPopupHandler('requestQuery'), setPath: () => Promise.resolve(), setHandler: (name, fn) => {
             if (name === 'setPath') {
                 return () => undefined;
             }
-            return snowsightClient.setHandler(name, fn);
+            return snowflakeClient.setHandler(name, fn);
         } });
 };
-const createSnowletIframeClient = () => {
-    return SnowletClient.createSnowsightClient((0, PubSub_1.createPubSub)({
-        pubsubId: 'snowlet',
+const createNativeAppIframeClient = () => {
+    return Snowflake.createSnowflakeClient((0, PubSub_1.createPubSub)({
+        pubsubId: 'native-app',
         targetOrigin: "*",
         targetWindow: window.parent,
     }));
 };
-exports.snowsightClient = window.opener ? createSnowletDevClient() : createSnowletIframeClient();
+exports.snowflakeClient = window.opener ? createSnowflakeClient() : createNativeAppIframeClient();
 const getSnowsightClient = () => {
-    return exports.snowsightClient;
+    return exports.snowflakeClient;
 };
 exports.getSnowsightClient = getSnowsightClient;
-__exportStar(require("./snowsight/SnowsightClient"), exports);
-__exportStar(require("./snowsight/SnowsightRequests"), exports);
+__exportStar(require("./client/SnowflakeClient"), exports);
+__exportStar(require("./client/SnowflakeRequests"), exports);

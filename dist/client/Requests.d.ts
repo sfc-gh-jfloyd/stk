@@ -1,3 +1,3 @@
-import { SnowletRequests } from "../snowlet/SnowletRequests";
-import { SnowsightRequests } from "../snowsight/SnowsightRequests";
-export type Requests = SnowsightRequests | SnowletRequests;
+import { NativeAppRequests } from "./NativeAppRequests";
+import { SnowflakeRequests } from "./SnowflakeRequests";
+export type Requests = SnowflakeRequests | NativeAppRequests;

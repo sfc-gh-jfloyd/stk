@@ -1,42 +1,43 @@
 import { createPubSub } from "./pubsub/PubSub";
-import * as SnowsightClient from "./snowlet/SnowletClient";
-import * as SnowletClient from "./snowsight/SnowsightClient";
+import * as NativeApp from "./client/NativeAppClient";
+import * as Snowflake from "./client/SnowflakeClient";
 
 export interface ClientConfig {
   targetOrigin: string;
   targetWindow: Window;
 }
 
-export const createSnowletClient = ({ targetOrigin, targetWindow }: ClientConfig) => (
-  SnowsightClient.createSnowletClient(
+export const createNativeAppClient = ({ targetOrigin, targetWindow }: ClientConfig) => (
+  NativeApp.createNativeAppClient(
     createPubSub({
-      pubsubId: 'snowsight',
+      pubsubId: 'native-app',
       targetOrigin,
       targetWindow,
     })
   )
 );
 
-const createSnowletDevClient = (): SnowletClient.SnowsightClient => {
-   const snowsightClient = SnowletClient.createSnowsightClient(
+const createSnowflakeClient = (): Snowflake.SnowflakeClient => {
+   const snowflakeClient = Snowflake.createSnowflakeClient(
     createPubSub({
-      pubsubId: 'snowlet',
+      pubsubId: 'snowflake',
       targetOrigin: "*",
       targetWindow: window.opener,
     })
   );
 
-  const createPopupHandler = <T extends keyof SnowletClient.SnowsightClient> (functionName: T) => {
-    return async (...args: Parameters<SnowletClient.SnowsightClient[T]>) => {
-      const sdkUrl = await snowsightClient.getSdkUrl();
+  const createPopupHandler = <T extends keyof Snowflake.SnowflakeClient> (functionName: T) => {
+    return async (...args: Parameters<Snowflake.SnowflakeClient[T]>) => {
+      const snowsightNativeAppURl = await snowflakeClient.getSnowsightNativeAppUrl();
+      const sdkUrl = snowsightNativeAppURl + "/sdk";
       const snowsight = window.open(
         sdkUrl,
         '_blank',
         `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=800,height=600,left=${window.screenX + window.innerWidth/2 - 400},top=${window.screenY + window.innerHeight / 2 - 300}`,
       );
-      const windowSnowletClient = SnowletClient.createSnowsightClient(
+      const windowSnowletClient = Snowflake.createSnowflakeClient(
         createPubSub({
-          pubsubId: 'snowlet',
+          pubsubId: 'snowflake',
           targetOrigin: new URL(sdkUrl).origin,
           targetWindow: snowsight!,
         })
@@ -51,7 +52,7 @@ const createSnowletDevClient = (): SnowletClient.SnowsightClient => {
   };
 
   return {
-    ...snowsightClient,
+    ...snowflakeClient,
     requestReference: createPopupHandler('requestReference'),
     requestPrivileges: createPopupHandler('requestPrivileges'),
     requestQuery: createPopupHandler('requestQuery'),
@@ -61,28 +62,28 @@ const createSnowletDevClient = (): SnowletClient.SnowsightClient => {
         return () => undefined;
       }
 
-      return snowsightClient.setHandler(name, fn);
+      return snowflakeClient.setHandler(name, fn);
     },
   };
 };
 
-const createSnowletIframeClient = () => {
-  return SnowletClient.createSnowsightClient(
+const createNativeAppIframeClient = () => {
+  return Snowflake.createSnowflakeClient(
     createPubSub({
-      pubsubId: 'snowlet',
+      pubsubId: 'native-app',
       targetOrigin: "*",
       targetWindow: window.parent,
     })
   );
 };
 
-export const snowsightClient: SnowletClient.SnowsightClient = window.opener ? createSnowletDevClient() : createSnowletIframeClient();
+export const snowflakeClient: Snowflake.SnowflakeClient = window.opener ? createSnowflakeClient() : createNativeAppIframeClient();
 
 export const getSnowsightClient = () => {
-  return snowsightClient;
+  return snowflakeClient;
 };
 
-export { SnowletClient } from './snowlet/SnowletClient';
-export { SnowletRequests } from './snowlet/SnowletRequests';
-export * from './snowsight/SnowsightClient';
-export * from './snowsight/SnowsightRequests';
+export { NativeAppClient as SnowletClient } from './client/NativeAppClient';
+export { NativeAppRequests } from './client/NativeAppRequests';
+export * from './client/SnowflakeClient';
+export * from './client/SnowflakeRequests';

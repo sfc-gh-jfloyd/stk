@@ -1,5 +1,3 @@
-import { createIdGenerator } from "../client/IdGenerator";
-
 export enum MessageType {
   REQUEST = 'REQUEST',
   RESPONSE = 'RESPONSE',

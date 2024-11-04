@@ -23,7 +23,7 @@ export interface ClientConfig<F extends Requests> {
   onLog?: (...args: any[]) => void;
 }
 
-export const createClient = <F extends Requests, H extends Requests>({ 
+export const createClient = <F extends Requests, H extends Requests>({
   caller, 
   pubsub, 
   functionNames,
