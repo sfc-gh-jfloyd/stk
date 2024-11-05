@@ -8,6 +8,7 @@ const createNativeAppClient = (pubsub) => {
         pubsub,
         functionNames: {
             setPath: true,
+            setTheme: true,
         },
         onLog: (...args) => console.log(...args),
     });

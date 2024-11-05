@@ -22,9 +22,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -35,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSnowsightClient = exports.snowflakeClient = exports.createNativeAppClient = void 0;
+exports.createSnowflakeClient = exports.snowflakeClient = exports.createNativeAppClient = void 0;
 const PubSub_1 = require("./pubsub/PubSub");
 const NativeApp = __importStar(require("./client/NativeAppClient"));
 const Snowflake = __importStar(require("./client/SnowflakeClient"));
@@ -45,7 +42,7 @@ const createNativeAppClient = ({ targetOrigin, targetWindow }) => (NativeApp.cre
     targetWindow,
 })));
 exports.createNativeAppClient = createNativeAppClient;
-const createSnowflakeClient = () => {
+const createWindowSnowflakeClient = () => {
     const snowflakeClient = Snowflake.createSnowflakeClient((0, PubSub_1.createPubSub)({
         pubsubId: 'snowflake',
         targetOrigin: "*",
@@ -53,8 +50,8 @@ const createSnowflakeClient = () => {
     }));
     const createPopupHandler = (functionName) => {
         return (...args) => __awaiter(void 0, void 0, void 0, function* () {
-            const snowsightNativeAppURl = yield snowflakeClient.getSnowsightNativeAppUrl();
-            const sdkUrl = snowsightNativeAppURl + "/sdk";
+            const snowsightNativeAppUrl = yield snowflakeClient.getSnowsightNativeAppUrl();
+            const sdkUrl = snowsightNativeAppUrl + "/sdk";
             const snowsight = window.open(sdkUrl, '_blank', `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=800,height=600,left=${window.screenX + window.innerWidth / 2 - 400},top=${window.screenY + window.innerHeight / 2 - 300}`);
             const windowSnowletClient = Snowflake.createSnowflakeClient((0, PubSub_1.createPubSub)({
                 pubsubId: 'snowflake',
@@ -74,17 +71,15 @@ const createSnowflakeClient = () => {
             return snowflakeClient.setHandler(name, fn);
         } });
 };
-const createNativeAppIframeClient = () => {
+const createIframeSnowflakeClient = () => {
     return Snowflake.createSnowflakeClient((0, PubSub_1.createPubSub)({
-        pubsubId: 'native-app',
+        pubsubId: 'snowflake',
         targetOrigin: "*",
         targetWindow: window.parent,
     }));
 };
-exports.snowflakeClient = window.opener ? createSnowflakeClient() : createNativeAppIframeClient();
-const getSnowsightClient = () => {
+exports.snowflakeClient = window.opener ? createWindowSnowflakeClient() : createIframeSnowflakeClient();
+const createSnowflakeClient = () => {
     return exports.snowflakeClient;
 };
-exports.getSnowsightClient = getSnowsightClient;
-__exportStar(require("./client/SnowflakeClient"), exports);
-__exportStar(require("./client/SnowflakeRequests"), exports);
+exports.createSnowflakeClient = createSnowflakeClient;

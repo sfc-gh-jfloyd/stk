@@ -20,6 +20,7 @@ export const createSnowflakeClient = (pubsub: PubSub): SnowflakeClient => {
       setPath: true,
       getAppName: true,
       getSnowsightNativeAppUrl: true,
+      getTheme: true,
     },
     onLog: (...args) => console.log(...args),
   })

@@ -1,3 +1,4 @@
+import { SnowflakeTheme } from "./Theme";
 export interface QueryResponse {
     cols: {
         name: string;
@@ -25,6 +26,12 @@ export interface QueryRequestArgs {
      */
     reason: string;
 }
+export interface ReferenceResponse {
+    isConfigured: boolean;
+}
+export interface PrivilegesResponse {
+    isGranted: boolean;
+}
 /**
  * Requests which can be made to Snowflake
  */
@@ -36,11 +43,11 @@ export interface SnowflakeRequests {
     /**
      * Request that the user configure the given reference
      */
-    requestReference: (referenceName: string) => Promise<void>;
+    requestReference: (referenceName: string) => Promise<ReferenceResponse>;
     /**
      * Request that the user grant the given privileges
      */
-    requestPrivileges: (privileges: APPLICATION_GRANTS[]) => Promise<void>;
+    requestPrivileges: (privileges: APPLICATION_GRANTS[]) => Promise<PrivilegesResponse>;
     /**
      * Request that the user allow the given query to be executed one-time using their full privileges
      */
@@ -57,6 +64,10 @@ export interface SnowflakeRequests {
      * Gets the Snowsight URL for this user's native app instance
      */
     getSnowsightNativeAppUrl: () => Promise<string>;
+    /**
+     * Gets the UI theme. Only needed when running a native app inside of Snowsight.
+     */
+    getTheme: () => Promise<SnowflakeTheme>;
 }
 /**
  * Map to include all snowlet request function names

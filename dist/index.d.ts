@@ -6,8 +6,9 @@ export interface ClientConfig {
 }
 export declare const createNativeAppClient: ({ targetOrigin, targetWindow }: ClientConfig) => NativeApp.NativeAppClient;
 export declare const snowflakeClient: Snowflake.SnowflakeClient;
-export declare const getSnowsightClient: () => Snowflake.SnowflakeClient;
-export { NativeAppClient as SnowletClient } from './client/NativeAppClient';
+export declare const createSnowflakeClient: () => Snowflake.SnowflakeClient;
+export { NativeAppClient } from './client/NativeAppClient';
 export { NativeAppRequests } from './client/NativeAppRequests';
-export * from './client/SnowflakeClient';
-export * from './client/SnowflakeRequests';
+export { SnowflakeClient } from './client/SnowflakeClient';
+export { SnowflakeRequests, QueryResponse } from './client/SnowflakeRequests';
+export { SnowflakeTheme } from "./client/Theme";

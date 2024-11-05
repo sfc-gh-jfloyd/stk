@@ -14,6 +14,7 @@ export const createNativeAppClient = (pubsub: PubSub): NativeAppClient => {
     pubsub,
     functionNames: {
       setPath: true,
+      setTheme: true,
     },
     onLog: (...args) => console.log(...args),
   })

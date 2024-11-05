@@ -14,6 +14,7 @@ const createSnowflakeClient = (pubsub) => {
             setPath: true,
             getAppName: true,
             getSnowsightNativeAppUrl: true,
+            getTheme: true,
         },
         onLog: (...args) => console.log(...args),
     });

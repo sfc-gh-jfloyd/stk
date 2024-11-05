@@ -12,4 +12,5 @@ exports.SNOWSIGHT_REQUEST_FUNCTION_NAME_MAP = {
     setPath: true,
     getAppName: true,
     getSnowsightNativeAppUrl: true,
+    getTheme: true,
 };

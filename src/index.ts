@@ -17,7 +17,7 @@ export const createNativeAppClient = ({ targetOrigin, targetWindow }: ClientConf
   )
 );
 
-const createSnowflakeClient = (): Snowflake.SnowflakeClient => {
+const createWindowSnowflakeClient = (): Snowflake.SnowflakeClient => {
    const snowflakeClient = Snowflake.createSnowflakeClient(
     createPubSub({
       pubsubId: 'snowflake',
@@ -28,8 +28,8 @@ const createSnowflakeClient = (): Snowflake.SnowflakeClient => {
 
   const createPopupHandler = <T extends keyof Snowflake.SnowflakeClient> (functionName: T) => {
     return async (...args: Parameters<Snowflake.SnowflakeClient[T]>) => {
-      const snowsightNativeAppURl = await snowflakeClient.getSnowsightNativeAppUrl();
-      const sdkUrl = snowsightNativeAppURl + "/sdk";
+      const snowsightNativeAppUrl = await snowflakeClient.getSnowsightNativeAppUrl();
+      const sdkUrl = snowsightNativeAppUrl + "/sdk";
       const snowsight = window.open(
         sdkUrl,
         '_blank',
@@ -67,23 +67,24 @@ const createSnowflakeClient = (): Snowflake.SnowflakeClient => {
   };
 };
 
-const createNativeAppIframeClient = () => {
+const createIframeSnowflakeClient = () => {
   return Snowflake.createSnowflakeClient(
     createPubSub({
-      pubsubId: 'native-app',
+      pubsubId: 'snowflake',
       targetOrigin: "*",
       targetWindow: window.parent,
     })
   );
 };
 
-export const snowflakeClient: Snowflake.SnowflakeClient = window.opener ? createSnowflakeClient() : createNativeAppIframeClient();
+export const snowflakeClient = window.opener ? createWindowSnowflakeClient() : createIframeSnowflakeClient();
 
-export const getSnowsightClient = () => {
+export const createSnowflakeClient = () => {
   return snowflakeClient;
 };
 
-export { NativeAppClient as SnowletClient } from './client/NativeAppClient';
+export { NativeAppClient } from './client/NativeAppClient';
 export { NativeAppRequests } from './client/NativeAppRequests';
-export * from './client/SnowflakeClient';
-export * from './client/SnowflakeRequests';
+export { SnowflakeClient } from './client/SnowflakeClient';
+export { SnowflakeRequests, QueryResponse } from './client/SnowflakeRequests';
+export { SnowflakeTheme } from "./client/Theme";
