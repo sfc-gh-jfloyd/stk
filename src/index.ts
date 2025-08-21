@@ -88,3 +88,6 @@ export { NativeAppRequests } from './client/NativeAppRequests';
 export { SnowflakeClient } from './client/SnowflakeClient';
 export { SnowflakeRequests, QueryResponse } from './client/SnowflakeRequests';
 export { SnowflakeTheme } from "./client/Theme";
+
+const showWarning = createShowWarning();
+showWarning();
