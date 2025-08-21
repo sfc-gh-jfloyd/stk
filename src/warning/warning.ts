@@ -1,4 +1,4 @@
-const createShowWarning = () => {
+export const createShowWarning = () => {
   let warningShown = false;
   return () => {
     if (!window.opener && window.parent === window && !warningShown) {

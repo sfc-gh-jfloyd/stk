@@ -1,6 +1,7 @@
 import { createPubSub } from "./pubsub/PubSub";
 import * as NativeApp from "./client/NativeAppClient";
 import * as Snowflake from "./client/SnowflakeClient";
+import { createShowWarning } from "./warning/warning";
 
 export interface ClientConfig {
   targetOrigin: string;
