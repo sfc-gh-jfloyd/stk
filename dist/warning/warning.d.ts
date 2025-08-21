@@ -1,1 +1,1 @@
-declare const createShowWarning: () => () => void;
+export declare const createShowWarning: () => () => void;

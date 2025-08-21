@@ -46,6 +46,7 @@ exports.createSnowflakeClient = exports.snowflakeClient = exports.createNativeAp
 const PubSub_1 = require("./pubsub/PubSub");
 const NativeApp = __importStar(require("./client/NativeAppClient"));
 const Snowflake = __importStar(require("./client/SnowflakeClient"));
+const warning_1 = require("./warning/warning");
 const createNativeAppClient = ({ targetOrigin, targetWindow }) => (NativeApp.createNativeAppClient((0, PubSub_1.createPubSub)({
     pubsubId: 'native-app',
     targetOrigin,
@@ -93,5 +94,5 @@ const createSnowflakeClient = () => {
     return exports.snowflakeClient;
 };
 exports.createSnowflakeClient = createSnowflakeClient;
-const showWarning = createShowWarning();
+const showWarning = (0, warning_1.createShowWarning)();
 showWarning();

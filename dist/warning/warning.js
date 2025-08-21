@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createShowWarning = void 0;
 const createShowWarning = () => {
     let warningShown = false;
     return () => {
@@ -23,3 +25,4 @@ const createShowWarning = () => {
         }
     };
 };
+exports.createShowWarning = createShowWarning;
